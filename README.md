@@ -10,7 +10,25 @@ by any .service files (code: 2)
 
 This repo makes it work without installing a keyring daemon.
 
-## Why installing libsecret doesn't fix it
+## Usage
+
+Requires a C compiler and `make`. Nothing else.
+
+```sh
+./install.sh                          # uses proton-drive from $PATH
+./install.sh /path/to/proton-drive    # or point at it explicitly
+```
+
+This builds the shim into `~/.local/lib/fakesecret/`, moves your binary to
+`proton-drive.bin`, and installs a wrapper in its place. Then:
+
+```sh
+proton-drive auth login
+```
+
+opens the browser and writes the session in `~/.local/share/fake-secrets`.
+
+## How it works
 
 `proton-drive` is a [Bun](https://bun.sh)-compiled binary and uses Bun's
 `Bun.secrets` API to store your session. On Linux that `dlopen()`s
@@ -35,8 +53,6 @@ file fallback, no keyring backend option. (And there is no password to supply
 in plaintext — `auth login` is browser-based OAuth; the stored secret is a
 session token.)
 
-## What this does instead
-
 `fakesecret.c` is a ~300-line stand-in for `libsecret-1.so.0` implementing
 those five functions against a plaintext file. No daemon, no D-Bus, nothing
 to install. A wrapper script puts it ahead of the real libsecret on the
@@ -52,26 +68,6 @@ having to run a keyring daemon.
 
 Treat that file like a password. If that trade-off isn't acceptable, install
 `gnome-keyring`, `keepassxc`, or `pass-secret-service` instead.
-
-## Install
-
-Requires a C compiler and `make`. Nothing else.
-
-```sh
-git clone https://github.com/YOURNAME/proton-cli-without-libsecret
-cd proton-cli-without-libsecret
-./install.sh                          # uses proton-drive from $PATH
-./install.sh /path/to/proton-drive    # or point at it explicitly
-```
-
-This builds the shim into `~/.local/lib/fakesecret/`, moves your binary to
-`proton-drive.bin`, and installs a wrapper in its place. Then:
-
-```sh
-proton-drive auth login
-```
-
-A browser opens; the session lands in `~/.local/share/fake-secrets`.
 
 ### Doing it by hand
 
